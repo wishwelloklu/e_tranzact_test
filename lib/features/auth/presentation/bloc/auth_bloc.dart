@@ -9,48 +9,52 @@ class AuthBloc extends Bloc<AuthEvents, AuthStates> {
   final _share = AppSharedPreferences.instance;
 
   AuthBloc() : super(InitialState()) {
-    on<LoginEvent>((event, emit) async {
-      emit(AuthProcessing());
-      await Future.delayed(Duration(seconds: 2));
-      final data = await _share.getShareString(CacheKeys.authKey);
-      if (data != null) {
-        final userData = UserModel.fromJson(data);
-        if (event.password == userData.password &&
-            event.email == userData.email) {
-          await _share.saveBoolShare(data: true, key: CacheKeys.session);
-          emit(AuthenticatedState(userData));
-        } else {
-          emit(UnAuthenticatedState('Wrong credentials'));
-        }
-      } else {
-        emit(UnAuthenticatedState('Wrong credentials'));
-      }
-    });
+    on<LoginEvent>((event, emit) async => _onLoginEvent(event, emit));
 
     on<SignupEvent>((event, emit) async => _onSignupEvent(event, emit));
 
-    on<LogoutEvent>((event, emit) {
-      _share.deleteAllShareData();
+    on<LogoutEvent>((event, emit) async {
+      await _share.saveBoolShare(data: false, key: CacheKeys.session);
       emit(UnAuthenticatedState());
     });
 
     on<CheckAuthStatusEvent>(
-      (event, emit) async {
-        final data = await _share.getShareString(CacheKeys.authKey);
-        if (data != null) {
-          final session = await _share.getShareBool(CacheKeys.session);
-          if (session) {
-            final userData = UserModel.fromJson(data);
-            emit(AuthenticatedState(userData));
-          } else {
-            emit(UnAuthenticatedState());
-          }
-        } else {
-          emit(UnAuthenticatedState());
-        }
-        print(state);
-      },
+      (event, emit) async => await _onCheckAuthStatus(emit),
     );
+  }
+
+  Future<void> _onCheckAuthStatus(Emitter<AuthStates> emit) async {
+    final data = await _share.getShareString(CacheKeys.authKey);
+    if (data != null) {
+      final session = await _share.getShareBool(CacheKeys.session);
+      if (session) {
+        final userData = UserModel.fromJson(data);
+        emit(AuthenticatedState(userData));
+      } else {
+        emit(UnAuthenticatedState());
+      }
+    } else {
+      emit(UnAuthenticatedState());
+    }
+    print(state);
+  }
+
+  Future<void> _onLoginEvent(LoginEvent event, Emitter<AuthStates> emit) async {
+    emit(AuthProcessing());
+    await Future.delayed(Duration(seconds: 2));
+    final data = await _share.getShareString(CacheKeys.authKey);
+    if (data != null) {
+      final userData = UserModel.fromJson(data);
+      if (event.password == userData.password &&
+          event.email == userData.email) {
+        await _share.saveBoolShare(data: true, key: CacheKeys.session);
+        emit(AuthenticatedState(userData));
+      } else {
+        emit(UnAuthenticatedState('Wrong credentials'));
+      }
+    } else {
+      emit(UnAuthenticatedState('Wrong credentials'));
+    }
   }
 
   Future<void> _onSignupEvent(

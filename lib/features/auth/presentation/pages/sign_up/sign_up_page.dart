@@ -35,6 +35,16 @@ class _LoginState extends State<SignUpPage> {
   final lnameFocusNode = FocusNode();
   final passwordFocusNode = FocusNode();
   final GlobalKey<FormState> _formstate = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    emailTextEditingController.clear();
+    passwordTextEditingController.clear();
+    fnameTextEditingController.clear();
+    lnameTextEditingController.clear();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -102,16 +112,18 @@ class _LoginState extends State<SignUpPage> {
                     'Forgot?',
                     style: AppFontStyle.boldFont(color: Colors.black),
                   ))),
-              SizedBox(height: 15),
+              SizedBox(height: 40),
               PrimaryButton(
                 text: 'Sign up',
                 onPressed: () {
-                  context.read<AuthBloc>().add(SignupEvent(UserModel(
-                        email: emailTextEditingController.text,
-                        password: passwordTextEditingController.text,
-                        firstname: fnameTextEditingController.text,
-                        lastname: lnameTextEditingController.text,
-                      )));
+                  if (_formstate.currentState?.validate() ?? false) {
+                    context.read<AuthBloc>().add(SignupEvent(UserModel(
+                          email: emailTextEditingController.text,
+                          password: passwordTextEditingController.text,
+                          firstname: fnameTextEditingController.text,
+                          lastname: lnameTextEditingController.text,
+                        )));
+                  }
                 },
                 backgroundColor: AppColors.blueColor,
                 foregroundColor: AppColors.white,

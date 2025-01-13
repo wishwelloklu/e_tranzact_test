@@ -33,13 +33,18 @@ class InputTextfield extends StatelessWidget {
           ? (value) {
               RegExp regex = RegExp(ConstantConfig.emailPattern);
               if (value == null || value.isEmpty) {
-                return "Enter your email";
+                return "This field is required";
               } else if (!regex.hasMatch(value)) {
                 return "Please enter a valid email address";
               }
               return null;
             }
-          : null,
+          : (value) {
+              if (value == null || value.isEmpty) {
+                return "This field is required";
+              }
+              return null;
+            },
       decoration: InputDecoration(
           hintText: hint,
           icon: leading,

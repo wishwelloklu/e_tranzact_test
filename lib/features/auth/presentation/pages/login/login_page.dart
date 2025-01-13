@@ -29,6 +29,14 @@ class _LoginState extends State<LoginPage> {
   final emailFocusNode = FocusNode();
   final passwordFocusNode = FocusNode();
   final GlobalKey<FormState> _formstate = GlobalKey<FormState>();
+  
+  @override
+  void dispose() {
+    emailTextEditingController.clear();
+    passwordTextEditingController.clear();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,12 +76,11 @@ class _LoginState extends State<LoginPage> {
               ),
               SizedBox(height: 15),
               InputTextfield(
-                controller: emailTextEditingController,
-                focusNode: emailFocusNode,
-                hint: 'Email ID',
-                leading: Icon(Icons.alternate_email_sharp),
-                isEmail:true
-              ),
+                  controller: emailTextEditingController,
+                  focusNode: emailFocusNode,
+                  hint: 'Email ID',
+                  leading: Icon(Icons.alternate_email_sharp),
+                  isEmail: true),
               SizedBox(height: 15),
               InputTextfield(
                   controller: passwordTextEditingController,
@@ -86,7 +93,7 @@ class _LoginState extends State<LoginPage> {
                     'Forgot?',
                     style: AppFontStyle.boldFont(color: Colors.black),
                   ))),
-              SizedBox(height: 15),
+              SizedBox(height: 40),
               PrimaryButton(
                 text: 'Login',
                 onPressed: () {
